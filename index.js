@@ -10,20 +10,18 @@ const config = {
   channelAccessToken: process.env.CHANNEL_ACCESS_TOKEN,
 };
 
-// Firebaseキーの読み込み
-const firebaseKey = process.env.FIREBASE_KEY_PATH;
-let firebaseServiceAccount;
+// Firebase Admin SDKの初期化
+const admin = require("firebase-admin");
 
+let firebaseServiceAccount;
 try {
-  firebaseServiceAccount = JSON.parse(firebaseKey);
+  firebaseServiceAccount = JSON.parse(process.env.FIREBASE_KEY_PATH);
   console.log("Firebase key loaded successfully.");
 } catch (error) {
-  console.error("Failed to load Firebase key:", error);
+  console.error("Failed to parse Firebase key from environment variable:", error);
   process.exit(1);
 }
 
-// Firebase Admin SDKの初期化
-const admin = require("firebase-admin");
 admin.initializeApp({
   credential: admin.credential.cert(firebaseServiceAccount),
 });
@@ -56,15 +54,19 @@ app.post("/webhook", (req, res) => {
 
 // イベント処理関数
 async function handleEvent(event) {
+  console.log("Received event:", event);
+
   if (event.type === "message" && event.message.type === "text") {
     const receivedMessage = event.message.text;
     console.log(`受信したメッセージ: ${receivedMessage}`);
 
+    // Firebaseからデータを取得
     const docRef = db.collection("message").doc(receivedMessage);
     const doc = await docRef.get();
 
     if (doc.exists) {
       const responseMessage = doc.data().response;
+      console.log("Found response:", responseMessage);
 
       if (responseMessage.startsWith("http")) {
         // 画像URLの場合、画像メッセージを送信
@@ -109,7 +111,6 @@ async function handleEvent(event) {
     }
   }
 }
-
 
 // サーバー起動
 const PORT = process.env.PORT || 3000;
