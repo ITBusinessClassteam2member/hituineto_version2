@@ -1,16 +1,16 @@
-const { Client, middleware } = require("@line/bot-sdk");
+ï»¿const { Client, middleware } = require("@line/bot-sdk");
 const express = require("express");
 require("dotenv").config();
 
 const app = express();
 
-// LINE Messaging API‚ÌÝ’è
+// LINE Messaging APIã®è¨­å®š
 const config = {
   channelSecret: process.env.CHANNEL_SECRET,
   channelAccessToken: process.env.CHANNEL_ACCESS_TOKEN,
 };
 
-// Firebase Admin SDK‚Ì‰Šú‰»
+// Firebase Admin SDKã®åˆæœŸåŒ–
 const admin = require("firebase-admin");
 
 let firebaseServiceAccount;
@@ -28,19 +28,19 @@ admin.initializeApp({
 
 const db = admin.firestore();
 
-// LINEƒNƒ‰ƒCƒAƒ“ƒg‚Ìì¬
+// LINEã‚¯ãƒ©ã‚¤ã‚¢ãƒ³ãƒˆã®ä½œæˆ
 const client = new Client(config);
 
-// Content-Typeƒwƒbƒ_[‚ðÝ’è
+// Content-Typeãƒ˜ãƒƒãƒ€ãƒ¼ã‚’è¨­å®š
 app.use((req, res, next) => {
   res.setHeader("Content-Type", "application/json; charset=utf-8");
   next();
 });
 
-// middleware‚Ì“K—p
+// middlewareã®é©ç”¨
 app.use(middleware(config));
 
-// WebhookƒGƒ“ƒhƒ|ƒCƒ“ƒg
+// Webhookã‚¨ãƒ³ãƒ‰ãƒã‚¤ãƒ³ãƒˆ
 app.post("/webhook", (req, res) => {
   console.log("Received webhook event:", JSON.stringify(req.body, null, 2));
 
@@ -52,15 +52,15 @@ app.post("/webhook", (req, res) => {
     });
 });
 
-// ƒCƒxƒ“ƒgˆ—ŠÖ”
+// ã‚¤ãƒ™ãƒ³ãƒˆå‡¦ç†é–¢æ•°
 async function handleEvent(event) {
   console.log("Received event:", event);
 
   if (event.type === "message" && event.message.type === "text") {
     const receivedMessage = event.message.text;
-    console.log(`ŽóM‚µ‚½ƒƒbƒZ[ƒW: ${receivedMessage}`);
+    console.log(`å—ä¿¡ã—ãŸãƒ¡ãƒƒã‚»ãƒ¼ã‚¸: ${receivedMessage}`);
 
-    // Firebase‚©‚çƒf[ƒ^‚ðŽæ“¾
+    // Firebaseã‹ã‚‰ãƒ‡ãƒ¼ã‚¿ã‚’å–å¾—
     const docRef = db.collection("message").doc(receivedMessage);
     const doc = await docRef.get();
 
@@ -69,14 +69,14 @@ async function handleEvent(event) {
       console.log("Found response:", responseMessage);
 
       if (responseMessage.startsWith("http")) {
-        // ‰æ‘œURL‚Ìê‡A‰æ‘œƒƒbƒZ[ƒW‚ð‘—M
+        // ç”»åƒURLã®å ´åˆã€ç”»åƒãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã‚’é€ä¿¡
         return client.replyMessage(event.replyToken, {
           type: "image",
           originalContentUrl: responseMessage,
           previewImageUrl: responseMessage,
         });
       } else {
-        // ’Êí‚ÌƒeƒLƒXƒgƒƒbƒZ[ƒW
+        // é€šå¸¸ã®ãƒ†ã‚­ã‚¹ãƒˆãƒ¡ãƒƒã‚»ãƒ¼ã‚¸
         return client.replyMessage(event.replyToken, {
           type: "text",
           text: responseMessage,
@@ -86,12 +86,12 @@ async function handleEvent(event) {
       console.log("No response found for the message.");
       return client.replyMessage(event.replyToken, {
         type: "text",
-        text: "‚·‚Ý‚Ü‚¹‚ñA‚»‚ÌƒƒbƒZ[ƒW‚É‚Í‘Î‰ž‚Å‚«‚Ü‚¹‚ñB",
+        text: "ã™ã¿ã¾ã›ã‚“ã€ãã®ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã«ã¯å¯¾å¿œã§ãã¾ã›ã‚“ã€‚",
       });
     }
   }
 
-  // ƒ|ƒXƒgƒoƒbƒNƒCƒxƒ“ƒg‚Ìˆ—
+  // ãƒã‚¹ãƒˆãƒãƒƒã‚¯ã‚¤ãƒ™ãƒ³ãƒˆã®å‡¦ç†
   if (event.type === "postback") {
     const postbackData = event.postback.data;
 
@@ -106,13 +106,13 @@ async function handleEvent(event) {
 
       return client.replyMessage(event.replyToken, {
         type: "text",
-        text: "‚²‹¦—Í‚ ‚è‚ª‚Æ‚¤‚²‚´‚¢‚Ü‚·I",
+        text: "ã”å”åŠ›ã‚ã‚ŠãŒã¨ã†ã”ã–ã„ã¾ã™ï¼",
       });
     }
   }
 }
 
-// ƒT[ƒo[‹N“®
+// ã‚µãƒ¼ãƒãƒ¼èµ·å‹•
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
