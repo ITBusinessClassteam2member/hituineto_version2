@@ -7,7 +7,7 @@
 	required = true
 [http]
 	sslBackend = openssl
-	sslCAInfo = D:/my-line-bot/mingw64/etc/ssl/certs/ca-bundle.crt
+	sslCAInfo = D:/my-line-bot/git/mingw64/etc/ssl/certs/ca-bundle.crt
 [core]
 	autocrlf = true
 	fscache = true
